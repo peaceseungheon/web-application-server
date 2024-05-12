@@ -1,5 +1,8 @@
 package util;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,9 +11,45 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 public class HttpRequestUtils {
+
+    private static final String DEFAULT_PATH = "/index.html";
+
+    public static byte[] getResource(String uri) {
+        File file;
+        if(uri.equals("/")){
+            file = new File("./webapp" + DEFAULT_PATH);
+        }else {
+            file = new File("./webapp" + uri);
+        }
+        try {
+            return Files.readAllBytes(file.toPath());
+        }catch (IOException e){
+            throw new RuntimeException("파일을 읽지 못했습니다.");
+        }
+    }
+
+    public static boolean isHttpMethodLine(String[] tokens){
+        if(tokens.length == 0){
+            return false;
+        }
+        String method = tokens[0];
+
+        String[] methods = new String[]{"GET", "POST", "PUT", "DELETE"};
+
+        boolean isHttpMethodLine = false;
+        for(String m : methods){
+            if(method.equalsIgnoreCase(m)){
+                isHttpMethodLine = true;
+                break;
+            }
+        }
+        return isHttpMethodLine;
+    }
+
+
     /**
-     * @param queryString은
-     *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
+     * @param queryString
+     * queryString 은 URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
      * @return
      */
     public static Map<String, String> parseQueryString(String queryString) {
